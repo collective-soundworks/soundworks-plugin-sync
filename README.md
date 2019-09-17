@@ -91,7 +91,7 @@ class MyExperience extends Experience {
 
 - `getTimeFunction`: function that return a time to be used as the common time (sync time) accross clients and server (default to `process.hrtime`)
 
-## More infos
+## Readings
 
 cf. [Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5](https://smartech.gatech.edu/handle/1853/54598) for more informations
 
