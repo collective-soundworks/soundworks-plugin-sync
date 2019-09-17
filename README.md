@@ -6,7 +6,7 @@
 
 ## Install
 
-```
+```sh
 npm install --save @soundworks/service-sync
 ```
 
@@ -16,7 +16,7 @@ npm install --save @soundworks/service-sync
 
 #### registering the service
 
-```
+```js
 // index.js
 import { Client } from '@soundworks/core/client';
 import serviceSyncFactory from '@soundworks/service-sync/client';
@@ -29,7 +29,7 @@ client.registerService('sync', serviceSyncFactory, {
 
 #### requiring the service 
 
-```
+```js
 // MyExperience.js
 import { Experience } from '@soundworks/core/client';
 
@@ -56,7 +56,7 @@ class MyExperience extends Experience {
 
 #### registering the service
 
-```
+```js
 // index.js
 import { Server } from '@soundworks/core/server';
 import serviceSyncFactory from '@soundworks/service-sync/server';
@@ -67,7 +67,7 @@ server.registerService('sync', serviceSyncFactory, {}, dependencies = []);
 
 #### requiring the service 
 
-```
+```js
 // MyExperience.js
 import { Experience } from '@soundworks/core/server';
 
