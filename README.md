@@ -1,6 +1,6 @@
 # soundworks-service-template
 
-> Sync service for the soundworks framework.
+> `soundworks` service dedicated at synchronizing clocks across devices
 >
 > Basically a wrapper of [https://github.com/collective-soundworks/sync](https://github.com/collective-soundworks/sync)
 
@@ -10,7 +10,7 @@
 npm install --save @soundworks/service-sync
 ```
 
-## Configuration
+## Usage
 
 ### Client
 
@@ -116,9 +116,9 @@ class MyExperience extends Experience {
 
 - `getTimeFunction`: function that return a time to be used as the common time (sync time) accross clients and server (default to `process.hrtime`)
 
-## Readings
+## More informations
 
-cf. [Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5](https://smartech.gatech.edu/handle/1853/54598) for more informations
+- [Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5](https://smartech.gatech.edu/handle/1853/54598)
 
 ## License
 

@@ -5,8 +5,14 @@
   "authors": [
     "Benjamin Matuszewski"
   ],
-  "private": true,
   "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/collective-soundworks/soundworks"
+  },
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server",
     "deploy": "np --yolo",
