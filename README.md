@@ -1,4 +1,4 @@
-# @soundworks/service-sync
+# `@soundworks/service-sync`
 
 > `soundworks` service dedicated at synchronizing clocks across devices
 >
