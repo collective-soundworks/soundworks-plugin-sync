@@ -61,6 +61,7 @@ class MyExperience extends Experience {
   constructor() {
     super();
 
+    // this.platform = this.require('platform');
     this.sync = this.require('sync');
   }
 
