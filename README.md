@@ -27,6 +27,30 @@ client.registerService('sync', serviceSyncFactory, {
 }, dependencies = []);
 ```
 
+##### usage in conjonction with `@soundworks/service-platform`
+
+If you use an `AudioContext` to synchronize audio events accross device, the  `AudioContext` should be resumed before the synchronization process starts. This can be achieved using the `@soundworks/service-platform`.
+
+```js
+// index.js
+import { Client } from '@soundworks/core/client';
+import servicePlatformFactory from '@soundworks/service-platform/client';
+import serviceSyncFactory from '@soundworks/service-sync/client';
+
+const client = new Client();
+const audioContext = new AudioContext();
+
+client.registerService('platform', serviceSyncFactory, {
+  features: [
+    ['web-audio', audioContext]
+  ]
+}, []);
+
+client.registerService('sync', serviceSyncFactory, {
+  getTimeFunction: () => audioContext.currentTime,
+}, ['platform']); // add 'platform' as a dependency of the sync service
+```
+
 #### requiring the service 
 
 ```js
@@ -49,8 +73,8 @@ class MyExperience extends Experience {
 
 #### options
 
-- `getTimeFunction`: function that return a clock to be synchronized with the server (default to `() => new Date().getTime()`)
-- `report`: define if the client should report the synchronization reports to the server. (defaults to  `false`)
+- `getTimeFunction`: function that return a clock to be synchronized with the server (defaults to `() => new Date().getTime()`)
+- `report`: define if the client should report the synchronization reports to the server (defaults to  `false`)
 
 ### Server
 
