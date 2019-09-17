@@ -1,0 +1,23 @@
+{
+  "source": {
+    "include": [
+      "README.md",
+      "src/**/*.js",
+    ]
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "projectTitle": "Soundworks",
+    "template": "node_modules/@ircam/jsdoc-template",
+    "destination": "./docs",
+    "encoding": "utf8"
+  },
+  "templates": {
+    "default": {
+      "useLongnameInNav": true
+    },
+    "footer": ""
+  }
+}

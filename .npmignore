@@ -1,0 +1,8 @@
+docs
+src
+tests
+example
+
+jsdoc.json
+.babelrc
+.editorconfig
