@@ -79,6 +79,33 @@ const serviceFactory = function(Service) {
     disconnect(client) {
       super.disconnect(client);
     }
+
+
+    /**
+     * Time of the local clock. If no arguments provided, returns the current
+     * local time, else performs the convertion between the given sync time
+     * and the associated local time.
+     * @note: server-side, `getLocalTime` and `getSyncTime` are identical
+     *
+     * @param {Number} [syncTime] - optionnal, time from the sync clock (sec).
+     * @return {Number} - Local time corresponding to the given sync time (sec).
+     */
+    getLocalTime(syncTime) {
+      return this._sync.getLocalTime(syncTime);
+    }
+
+    /**
+     * Time of the synced clock. If no arguments provided, returns the current
+     * sync time, else performs the convertion between the given local time
+     * and the associated sync time.
+     * @note: server-side, `getLocalTime` and `getSyncTime` are identical
+     *
+     * @param {Number} [audioTime] - optionnal, time from the local clock (sec).
+     * @return {Number} - Sync time corresponding to the given local time (sec).
+     */
+    getSyncTime(localTime) {
+      return this._sync.getSyncTime(localTime);
+    }
   }
 }
 

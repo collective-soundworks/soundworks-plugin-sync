@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/service-sync",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.2",
   "description": "soundworks service dedicated at synchronizing clocks across devices",
   "authors": [
     "Benjamin Matuszewski"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/collective-soundworks/soundworks"
+    "url": "https://github.com/collective-soundworks/soundworks-service-sync"
   },
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server",
@@ -24,13 +24,6 @@
     "watch:client": "chokidar src/client/ -c \"npm run transpile:client\"",
     "watch:server": "chokidar src/server/ -c \"npm run transpile:server\"",
     "watch": "npm run clean && npm run transpile && concurrently \"npm run watch:client\" \"npm run watch:server\""
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/collective-soundworks/soundworks-services"
   },
   "dependencies": {
     "@ircam/sync": "^2.0.1"
