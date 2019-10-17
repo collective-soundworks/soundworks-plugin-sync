@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/service-sync",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "soundworks service dedicated at synchronizing clocks across devices",
   "authors": [
     "Benjamin Matuszewski"

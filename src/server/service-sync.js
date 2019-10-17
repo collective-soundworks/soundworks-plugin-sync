@@ -30,8 +30,6 @@ const serviceFactory = function(Service) {
     }
 
     start() {
-      this.ready();
-
       this._sync = new SyncServer(this.options.getTimeFunction);
 
       this.server.stateManager.observe(async (schemaName, clientId) => {
