@@ -195,22 +195,23 @@ class MyExperience {
   async start() {
     super.start();
 
-    // create a scheduler to schedule events in the sync time reference
+    // Create a scheduler that schedule events in the sync time reference
     const getTimeFunction = () => this.sync.getSyncTime();
-    // provide a way for the scheduler to compute the audio time from
-    // the scheduler time
-    const currentTimeToAudioTimeFunction = currentTime => {
-      // currentTime is in the sync time reference we gave in getTimeFunction,
-      // and the sync plugin is configured to synchronize the audio clock,
-      // therefore we just need to convert back to the local (audio) time
-      return this.sync.getLocalTime(currentTime);
-    }
+    // Provide a conversion function that allows the scheduler to compute
+    // the audio time from it own scheduling time reference.
+    // As `currentTime` is in the sync time reference we gave in
+    // `getTimeFunction` and that the sync plugin is configured to use
+    // the audio clock as a local reference, we therefore just need to convert
+    // back to the local time.
+    const currentTimeToAudioTimeFunction =
+      currentTime => this.sync.getLocalTime(currentTime);
+
     // create the scheduler
     const scheduler = new Scheduler(getTimeFunction, {
       currentTimeToAudioTimeFunction
     });
 
-    // create a dummy engine
+    // create a idiot engine
     const engine = {
       // - `currentTime` is the current time of the scheduler
       // (aka the `syncTime`)
