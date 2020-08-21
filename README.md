@@ -160,20 +160,19 @@ import pluginPlatformFactory from '@soundworks/plugin-platform/client';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioContext = new AudioContext();
 
-  client.pluginManager.register('platform', pluginPlatformFactory, {
-    features: [
-      ['web-audio', audioContext],
-    ]
-  }, []);
+client.pluginManager.register('platform', pluginPlatformFactory, {
+  features: [
+    ['web-audio', audioContext],
+  ]
+}, []);
 
-  // `getTimeFunction` makes use of the `audioContext.currentTime`
-  // to synchronize according to the audio clock reference.
-  // The last argument define the platform plugin as a dependency of the
-  // sync plugin, so that sync process starts with a resumed audio clock.
-  client.pluginManager.register('sync', pluginSyncFactory, {
-    getTimeFunction: () => audioContext.currentTime,
-  }, ['platform']);
-
+// `getTimeFunction` makes use of the `audioContext.currentTime`
+// to synchronize according to the audio clock reference.
+// The last argument define the platform plugin as a dependency of the
+// sync plugin, so that sync process starts with a resumed audio clock.
+client.pluginManager.register('sync', pluginSyncFactory, {
+  getTimeFunction: () => audioContext.currentTime,
+}, ['platform']);
 ```
 
 Instantiate a scheduler running in the sync reference clock and add a synchronized audio engine:
