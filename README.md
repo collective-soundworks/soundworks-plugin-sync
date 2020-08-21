@@ -150,7 +150,7 @@ npm install --save waves-masters
 
 To synchronize the audio clock, the application should use the [`@soundworks/plugin-platform`](https://github.com/collective-soundworks/soundworks-plugin-platform) to resume the `audioContext` before starting the synchronization process.
 
-Therefore additionally to importing and requiring the plugin as describe in the `@soundworks/plugin-platform` documentation. The following code must be added client-side:
+Therefore additionally to importing and requiring the plugin as describe in the [`@soundworks/plugin-platform`](https://github.com/collective-soundworks/soundworks-plugin-platform) documentation. The following code must be added client-side:
 
 ```js
 // index.js
