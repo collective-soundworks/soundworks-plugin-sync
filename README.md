@@ -18,6 +18,7 @@
     + [Requiring the plugin](#requiring-the-plugin-1)
   * [Local time and synchronized time](#local-time-and-synchronized-time)
   * [Auditing synchronization process](#auditing-synchronization-process)
+  * [Synchronizing audio events with `waves-masters`](#synchronizing-audio-events-with-waves-masters)
 - [Resources](#resources)
 - [Credits](#credits)
 - [License](#license)
