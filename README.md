@@ -139,6 +139,102 @@ this.sync.onReport(report => {
 const report = this.sync.getReport();
 ```
 
+### Synchronizing audio events with `waves-masters`
+
+[`waves-masters`](https://github.com/wavesjs/waves-masters) is a library that provides low-level abstraction for scheduling and transport. it can be installed running
+
+```sh
+npm install --save waves-masters
+```
+
+To synchronize the audio clock, the application should use the [`@soundworks/plugin-platform`](https://github.com/collective-soundworks/soundworks-plugin-platform) to resume the `audioContext` before starting the synchronization process.
+
+Therefore additionally to importing and requiring the plugin as describe in the `@soundworks/plugin-platform` documentation. The following code must be added client-side:
+
+```js
+// index.js
+import pluginSyncFactory from '@soundworks/plugin-sync/client';
+import pluginPlatformFactory from '@soundworks/plugin-platform/client';
+
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContext();
+
+  client.pluginManager.register('platform', pluginPlatformFactory, {
+    features: [
+      ['web-audio', audioContext],
+    ]
+  }, []);
+
+  // `getTimeFunction` makes use of the `audioContext.currentTime`
+  // to synchronize according to the audio clock reference.
+  // The last argument define the platform plugin as a dependency of the
+  // sync plugin, so that sync process starts with a resumed audio clock.
+  client.pluginManager.register('sync', pluginSyncFactory, {
+    getTimeFunction: () => audioContext.currentTime,
+  }, ['platform']);
+
+```
+
+Instantiate a scheduler running in the sync reference clock and add a synchronized audio engine:
+
+```js
+// MyExperience.js
+import { AbstractExperience } from '@soundworks/core/client';
+import { Scheduler, TimeEngine } from 'waves-masters';
+
+class MyExperience {
+  constructor(client, audioContext) {
+    super(client);
+
+    this.audioContext = audioContext;
+
+    this.platform = this.require('platform');
+    this.sync = this.require('sync');
+  }
+
+  async start() {
+    super.start();
+
+    // create a scheduler to schedule events in the sync time reference
+    const getTimeFunction = () => this.sync.getSyncTime();
+    // provide a way for the scheduler to compute the audio time from
+    // the scheduler time
+    const currentTimeToAudioTimeFunction = currentTime => {
+      // currentTime is in the sync time reference we gave in getTimeFunction,
+      // and the sync plugin is configured to synchronize the audio clock,
+      // therefore we just need to convert back to the local (audio) time
+      return this.sync.getLocalTime(currentTime);
+    }
+    // create the scheduler
+    const scheduler = new Scheduler(getTimeFunction, {
+      currentTimeToAudioTimeFunction
+    });
+
+    // create a dummy engine
+    const engine = {
+      // - `currentTime` is the current time of the scheduler
+      // (aka the `syncTime`)
+      // - `audioTime` is the audioTime as computed by the provided
+      // `currentTimeToAudioTimeFunction`
+      // `dt` is the time between the actual call of the function
+      // and the time of the scheduled event
+      advanceTime: (currentTime, audioTime, dt) => {
+        const sine = this.audioContext.createOscillator();
+        sine.connect(this.audioContext.destination);
+        // play the sound in the audio clock reference
+        sine.start(audioTime);
+        sine.stop(audioTime + 0.1);
+        // return time of next event in the scheduler (sync) time reference
+        return currentTime + 1;
+      }
+    }
+
+    // add engine to the scheduler
+    scheduler.add(engine);
+  }
+}
+```
+
 ## Resources
 
 - [Jean-Philippe Lambert, Sébastien Robaszkiewicz, Norbert Schnell. Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5. 2nd Web Audio Conference, Apr 2016, Atlanta, GA, United States.](https://hal.archives-ouvertes.fr/hal-01304889v1)
