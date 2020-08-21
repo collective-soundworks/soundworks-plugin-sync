@@ -1,2 +1,2 @@
-import serviceFactory from './service-sync.js';
-export default serviceFactory;
+import pluginFactory from './plugin-sync.js';
+export default pluginFactory;

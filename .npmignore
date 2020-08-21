@@ -1,8 +1,4 @@
-docs
 src
-tests
-examples
 
-jsdoc.json
 .babelrc
 .editorconfig

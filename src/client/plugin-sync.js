@@ -19,15 +19,18 @@ import { SyncClient } from '@ircam/sync';
  * const syncTime = this.sync.getSyncTime();
  * const localTime = this.sync.getLocalTime(syncTime);
  */
-const serviceFactory = function(Service) {
+const pluginFactory = function(AbstractPlugin) {
 
-  return class ServiceSync extends Service {
+  return class PluginSync extends AbstractPlugin {
     constructor(client, name, options) {
       super(client, name);
 
+      const startTime = new Date().getTime() * 0.001
+
       const defaults = {
-        getTimeFunction: () => new Date().getTime() * 0.001,
-        report: false,
+        getTimeFunction: () => (new Date().getTime() * 0.001) - startTime,
+        globalReport: false, // do not document for now, for tests and internal use
+        // localReport: true,
       };
 
       this.options = this.configure(defaults, options);
@@ -35,6 +38,7 @@ const serviceFactory = function(Service) {
       this.getLocalTime = this.getLocalTime.bind(this);
       this.getSyncTime = this.getSyncTime.bind(this);
 
+      this._report = null;
       this._ready = false;
     }
 
@@ -62,7 +66,7 @@ const serviceFactory = function(Service) {
       };
 
       this._sync.start(sendFunction, receiveFunction, (report) => {
-        if (this.options.report === true) {
+        if (this.options.globalReport === true) {
           this.state.set({ report });
         }
 
@@ -71,9 +75,15 @@ const serviceFactory = function(Service) {
             this.ready();
           }
         }
+
+        this._report = report;
       });
 
       this.started();
+    }
+
+    getReport(callback) {
+      return this._report;
     }
 
     /**
@@ -102,7 +112,4 @@ const serviceFactory = function(Service) {
   }
 }
 
-// not mandatory
-serviceFactory.defaultName = 'service-sync';
-
-export default serviceFactory;
+export default pluginFactory;

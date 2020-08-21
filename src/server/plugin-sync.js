@@ -8,9 +8,9 @@ const schema = {
   }
 };
 
-const serviceFactory = function(Service) {
+const pluginFactory = function(AbstractPlugin) {
 
-  return class ServiceSync extends Service {
+  return class PluginSync extends AbstractPlugin {
     constructor(server, name, options) {
       super(server, name);
 
@@ -107,7 +107,4 @@ const serviceFactory = function(Service) {
   }
 }
 
-// not mandatory
-serviceFactory.defaultName = 'service-sync';
-
-export default serviceFactory;
+export default pluginFactory;
