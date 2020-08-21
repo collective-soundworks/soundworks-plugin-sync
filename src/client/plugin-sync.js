@@ -25,10 +25,10 @@ const pluginFactory = function(AbstractPlugin) {
     constructor(client, name, options) {
       super(client, name);
 
-      const startTime = new Date().getTime() * 0.001
+      const startTime = Date.now() * 0.001
 
       const defaults = {
-        getTimeFunction: () => (new Date().getTime() * 0.001) - startTime,
+        getTimeFunction: () => Date.now() * 0.001 - startTime,
         globalReport: false, // do not document for now, for tests and internal use
         // localReport: true,
       };
@@ -38,6 +38,7 @@ const pluginFactory = function(AbstractPlugin) {
       this.getLocalTime = this.getLocalTime.bind(this);
       this.getSyncTime = this.getSyncTime.bind(this);
 
+      this._onReport = report => {};
       this._report = null;
       this._ready = false;
     }
@@ -77,13 +78,10 @@ const pluginFactory = function(AbstractPlugin) {
         }
 
         this._report = report;
+        this._onReport(this._report);
       });
 
       this.started();
-    }
-
-    getReport(callback) {
-      return this._report;
     }
 
     /**
@@ -108,6 +106,22 @@ const pluginFactory = function(AbstractPlugin) {
      */
     getSyncTime(localTime) {
       return this._sync.getSyncTime(localTime);
+    }
+
+    /**
+     * Subscribe to reports
+     * @param {Function} callback
+     */
+    onReport(callback) {
+      this._onReport = callback;
+    }
+
+    /**
+     * Get current report
+     * @return {Object} report
+     */
+    getReport(callback) {
+      return this._report;
     }
   }
 }

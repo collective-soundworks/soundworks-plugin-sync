@@ -6,6 +6,7 @@
 
 <!-- toc -->
 
+- [Why](#why)
 - [Installation](#installation)
 - [Example](#example)
 - [Usage](#usage)
@@ -15,12 +16,17 @@
   * [Client installation](#client-installation)
     + [Registering the plugin](#registering-the-plugin-1)
     + [Requiring the plugin](#requiring-the-plugin-1)
-  * [Additional Documentation](#additional-documentation)
+  * [Local time and synchronized time](#local-time-and-synchronized-time)
+  * [Auditing synchronization process](#auditing-synchronization-process)
 - [Resources](#resources)
 - [Credits](#credits)
 - [License](#license)
 
 <!-- tocstop -->
+
+## Why
+
+Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" in _Maarten van Steen and Andrew S. Tanenbaum, A brief introduction to distributed systems, Computing, vol.98, n°10, 2016_
 
 ## Installation
 
@@ -45,8 +51,8 @@ import pluginSyncFactory from '@soundworks/plugin-sync/server';
 
 const server = new Server();
 server.pluginManager.register('sync', pluginSyncFactory, {
-  // choose the clock to use as the reference, defaults to
-  // where `startTime` is the time at which the plugin is instantiated:
+  // choose the clock to use as the reference, defaults to:
+  // (where `startTime` is the time at which the plugin is instantiated)
   getTimeFunction: () => {
     const now = process.hrtime(startTime);
     return now[0] + now[1] * 1e-9;
@@ -80,10 +86,9 @@ import pluginSyncFactory from '@soundworks/plugin-sync/client';
 
 const client = new Client();
 client.pluginManager.register('sync', pluginSyncFactory, {
-  // choose the clock to synchronize, defaults to
-  // where `startTime` is the time at which the plugin is instantiated:
-  // () => Date.getTime() / 1000
-  getTimeFunction: () => (new Date().getTime() * 0.001) - startTime,
+  // choose the clock to synchronize, defaults to:
+  // (where `startTime` is the time at which the plugin is instantiated)
+  getTimeFunction: () => Date.now() * 0.001 - startTime,
 }, []);
 ```
 
@@ -102,7 +107,37 @@ class MyExperience extends Experience {
 }
 ```
 
-### Additional Documentation
+### Local time and synchronized time
+
+The following API is similar client-side and server-side
+
+```js
+// get current time from the local clock reference
+const localTime = this.sync.getLocalTime();
+// get time in the local clock reference according to the
+// time given in the synchronized clock reference
+const localTime = this.sync.getLocalTime(syncTime);
+
+// get time estimated in the synchronized clock reference
+const sync = this.sync.getSyncTime();
+// get time estimated in the synchronized clock reference
+// according the time given in the local clock reference
+const sync = this.sync.getSyncTime(localTime);
+```
+
+### Auditing synchronization process
+
+On the client side you can track the synchronization process, by checking the synchronization reports
+
+```js
+// be notified when a new report is available
+this.sync.onReport(report => {
+  console.log(report);
+});
+
+// or in a pull fashion
+const report = this.sync.getReport();
+```
 
 ## Resources
 
