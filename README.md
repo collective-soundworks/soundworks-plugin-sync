@@ -238,7 +238,7 @@ class MyExperience {
 
 ## Resources
 
-- Jean-Philippe Lambert, Sébastien Robaszkiewicz, Norbert Schnell. Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5. 2nd Web Audio Conference, Apr 2016, Atlanta, GA, United States. [<hal-01304889v1>](https://hal.archives-ouvertes.fr/hal-01304889v1)
+- Jean-Philippe Lambert, Sébastien Robaszkiewicz, Norbert Schnell. Synchronisation for Distributed Audio Rendering over Heterogeneous Devices, in HTML5. 2nd Web Audio Conference, Apr 2016, Atlanta, GA, United States. <[hal-01304889v1](https://hal.archives-ouvertes.fr/hal-01304889v1)>
 
 ## Credits
 
