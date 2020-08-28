@@ -142,7 +142,7 @@ const report = this.sync.getReport();
 
 ### Synchronizing audio events with `waves-masters`
 
-[`waves-masters`](https://github.com/wavesjs/waves-masters) is a library that provides low-level abstraction for scheduling and transport. it can be installed running
+[`waves-masters`](https://github.com/wavesjs/waves-masters) is a library that provides low-level abstraction for scheduling and transport. It can be installed from `npm` running:
 
 ```sh
 npm install --save waves-masters
