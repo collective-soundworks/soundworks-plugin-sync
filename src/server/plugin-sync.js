@@ -51,7 +51,7 @@ const pluginFactory = function(AbstractPlugin) {
     connect(client) {
       super.connect(client);
 
-      const sendCache = new Float32Array(4);
+      const sendCache = new Float64Array(4);
 
       const sendFunction = (id, clientPingTime, serverPingTime, serverPongTime) => {
         sendCache[0] = id;

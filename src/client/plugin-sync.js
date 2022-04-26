@@ -47,7 +47,7 @@ const pluginFactory = function(AbstractPlugin) {
       this.state = await this.client.stateManager.create(`s:${this.name}`);
       this._sync = new SyncClient(this.options.getTimeFunction);
 
-      const sendCache = new Float32Array(2);
+      const sendCache = new Float64Array(2);
       const sendFunction = (id, clientPingTime) => {
         sendCache[0] = id;
         sendCache[1] = clientPingTime;
