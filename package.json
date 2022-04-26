@@ -21,7 +21,7 @@
     "url": "https://github.com/collective-soundworks/soundworks-plugin-sync"
   },
   "dependencies": {
-    "@ircam/sync": "^2.0.1"
+    "@ircam/sync": "^2.0.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
