@@ -2,3 +2,5 @@ src
 
 .babelrc
 .editorconfig
+
+tests
