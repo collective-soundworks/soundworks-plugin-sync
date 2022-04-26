@@ -98,7 +98,7 @@ const pluginFactory = function(AbstractPlugin) {
      * and the associated sync time.
      * @note: server-side, `getLocalTime` and `getSyncTime` are identical
      *
-     * @param {Number} [audioTime] - optionnal, time from the local clock (sec).
+     * @param {Number} [localTime] - optionnal, time from the local clock (sec).
      * @return {Number} - Sync time corresponding to the given local time (sec).
      */
     getSyncTime(localTime) {
