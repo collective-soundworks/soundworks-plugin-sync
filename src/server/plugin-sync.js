@@ -1,19 +1,16 @@
 import { SyncServer } from '@ircam/sync';
 
-const schema = {
-  report: {
-    type: 'any',
-    default: null,
-    nullable: true,
-  }
-};
+function isFunction(func) {
+  return Object.prototype.toString.call(func) == '[object Function]' ||
+    Object.prototype.toString.call(func) == '[object AsyncFunction]';
+}
 
-const pluginFactory = function(AbstractPlugin) {
+export default function(Plugin) {
+  return class PluginSync extends Plugin {
+    constructor(server, id, options) {
+      super(server, id);
 
-  return class PluginSync extends AbstractPlugin {
-    constructor(server, name, options) {
-      super(server, name);
-
+      // @todo - update w/ some getTime librarie (`sc-get-time`)
       const startTime = process.hrtime();
       const defaults = {
         getTimeFunction: () => {
@@ -22,34 +19,21 @@ const pluginFactory = function(AbstractPlugin) {
         },
       };
 
-      this.options = this.configure(defaults, options);
-      this.states = new Map();
+      this.options = Object.assign({}, defaults, options);
+
+      if (!isFunction(this.options.getTimeFunction)) {
+        throw new Error(`[soundworks:PluginSync] Invalid option "getTimeFunction", "getTimeFunction" is mandatory and should be a function`);
+      }
+
       this._sync = null;
-
-      this.server.stateManager.registerSchema(`s:${this.name}`, schema);
     }
 
-    start() {
+    async start() {
       this._sync = new SyncServer(this.options.getTimeFunction);
-
-      this.server.stateManager.observe(async (schemaName, stateId, clientId) => {
-        if (schemaName === `s:${this.name}`) {
-          const state = await this.server.stateManager.attach(schemaName, stateId);
-
-          this.states.set(clientId, state);
-
-          state.onDetach(() => {
-            this.states.delete(clientId);
-          });
-        }
-      });
-
-      this.started();
-      this.ready();
     }
 
-    connect(client) {
-      super.connect(client);
+    async addClient(client) {
+      await super.addClient(client);
 
       const sendCache = new Float64Array(4);
 
@@ -59,11 +43,11 @@ const pluginFactory = function(AbstractPlugin) {
         sendCache[2] = serverPingTime;
         sendCache[3] = serverPongTime;
 
-        client.socket.sendBinary(`s:${this.name}:pong`, sendCache);
+        client.socket.sendBinary(`s:${this.id}:pong`, sendCache);
       };
 
       const receiveFunction = callback => {
-        client.socket.addBinaryListener(`s:${this.name}:ping`, data => {
+        client.socket.addBinaryListener(`s:${this.id}:ping`, data => {
           const id = data[0];
           const clientPingTime = data[1];
 
@@ -74,8 +58,9 @@ const pluginFactory = function(AbstractPlugin) {
       this._sync.start(sendFunction, receiveFunction);
     }
 
-    disconnect(client) {
-      super.disconnect(client);
+    async removeClient(client) {
+      client.socket.removeAllBinaryListeners(`s:${this.id}:ping`);
+      await super.removeClient(client);
     }
 
 
@@ -83,6 +68,7 @@ const pluginFactory = function(AbstractPlugin) {
      * Time of the local clock. If no arguments provided, returns the current
      * local time, else performs the convertion between the given sync time
      * and the associated local time.
+     *
      * @note: server-side, `getLocalTime` and `getSyncTime` are identical
      *
      * @param {Number} [syncTime] - optionnal, time from the sync clock (sec).
@@ -96,6 +82,7 @@ const pluginFactory = function(AbstractPlugin) {
      * Time of the synced clock. If no arguments provided, returns the current
      * sync time, else performs the convertion between the given local time
      * and the associated sync time.
+     *
      * @note: server-side, `getLocalTime` and `getSyncTime` are identical
      *
      * @param {Number} [localTime] - optionnal, time from the local clock (sec).
@@ -104,7 +91,5 @@ const pluginFactory = function(AbstractPlugin) {
     getSyncTime(localTime) {
       return this._sync.getSyncTime(localTime);
     }
-  }
+  };
 }
-
-export default pluginFactory;

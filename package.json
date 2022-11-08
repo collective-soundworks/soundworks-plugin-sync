@@ -6,12 +6,15 @@
     "Benjamin Matuszewski"
   ],
   "license": "BSD-3-Clause",
+  "type": "module",
+  "exports": {
+    "./client.js": "./src/client/plugin-sync.js",
+    "./server.js": "./src/server/plugin-sync.js"
+  },
   "scripts": {
-    "clean": "rm -Rf client && rm -Rf server",
-    "toc": "markdown-toc -i README.md",
-    "prepublishOnly": "npm run build",
-    "build": "npm run toc && npm run clean && babel src --out-dir .",
-    "dev": "npm run build && chokidar src/ -c \"babel src --out-dir .\""
+    "lint": "npx eslint src && npx eslint tests",
+    "test": "mocha tests/plugin-sync.spec.js",
+    "toc": "markdown-toc -i README.md"
   },
   "publishConfig": {
     "access": "public"
@@ -20,15 +23,17 @@
     "type": "git",
     "url": "https://github.com/collective-soundworks/soundworks-plugin-sync"
   },
+  "bugs": {
+    "url": "https://github.com/collective-soundworks/soundworks-plugin-sync/issues"
+  },
+  "homepage": "https://github.com/collective-soundworks/soundworks-plugin-sync#readme",
   "dependencies": {
-    "@ircam/sync": "^2.0.3"
+    "@ircam/sync": "^2.1.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.11.1",
-    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "chokidar": "^3.4.2",
-    "chokidar-cli": "^2.1.0",
-    "markdown-toc": "^1.2.0"
+    "@ircam/eslint-config": "^1.1.0",
+    "chai": "^4.3.6",
+    "markdown-toc": "^1.2.0",
+    "mocha": "^10.1.0"
   }
 }

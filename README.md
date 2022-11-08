@@ -1,6 +1,11 @@
 # `@soundworks/plugin-sync`
 
-> [`soundworks`](https://github.com/collective-soundworks/soundworks) plugin for synchronizing arbitrary clocks across devices. The plugin is basically a wrapper around the [`@ircam/sync`](https://github.com/collective-soundworks/sync) library.
+[`soundworks`](https://github.com/collective-soundworks/soundworks) plugin for synchronizing clients on a common master clock.
+The plugin is built on top of the [`@ircam/sync`](https://github.com/collective-soundworks/sync) library). 
+
+## Why?
+
+Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" in _Maarten van Steen and Andrew S. Tanenbaum, A brief introduction to distributed systems, Computing, vol.98, n°10, 2016_
 
 ## Table of Contents
 
@@ -25,14 +30,10 @@
 
 <!-- tocstop -->
 
-## Why
-
-Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" in _Maarten van Steen and Andrew S. Tanenbaum, A brief introduction to distributed systems, Computing, vol.98, n°10, 2016_
-
 ## Installation
 
 ```sh
-npm install @soundworks/plugin-sync --save
+npm install --save @soundworks/plugin-sync
 ```
 
 ## Example
@@ -43,42 +44,29 @@ A working example can be found in the [https://github.com/collective-soundworks/
 
 ### Server installation
 
-#### Registering the plugin
-
 ```js
 // index.js
 import { Server } from '@soundworks/core/server';
 import pluginSyncFactory from '@soundworks/plugin-sync/server';
 
-const server = new Server();
-server.pluginManager.register('sync', pluginSyncFactory, {
-  // choose the clock to use as the reference, defaults to:
-  // (where `startTime` is the time at which the plugin is instantiated)
-  getTimeFunction: () => {
-    const now = process.hrtime(startTime);
-    return now[0] + now[1] * 1e-9;
-  },
-}, []);
+const server = new Server(config);
+server.pluginManager.register('sync', pluginSyncFactory);
 ```
 
-#### Requiring the plugin
+By default the server-side master clock return the time in seconds since the server started using `process.hrtime()`, i.e.
 
 ```js
-// MyExperience.js
-import { AbstractExperience } from '@soundworks/core/server';
+let startTime = process.hrtime();
 
-class MyExperience extends AbstractExperience {
-  constructor(server, clientType) {
-    super(server, clientType);
-    // require plugin in the experience
-    this.sync = this.require('sync');
-  }
+getTimeFunction() {
+  const now = process.hrtime(startTime);
+  return now[0] + now[1] * 1e-9;
 }
 ```
 
-### Client installation
+In most case, you will be perfectly fine with this default.
 
-#### Registering the plugin
+### Client installation
 
 ```js
 // index.js
@@ -86,27 +74,44 @@ import { Client } from '@soundworks/core/client';
 import pluginSyncFactory from '@soundworks/plugin-sync/client';
 
 const client = new Client();
-client.pluginManager.register('sync', pluginSyncFactory, {
-  // choose the clock to synchronize, defaults to:
-  // (where `startTime` is the time at which the plugin is instantiated)
-  getTimeFunction: () => Date.now() * 0.001 - startTime,
-}, []);
+client.pluginManager.register('sync', pluginSyncFactory);
 ```
 
-#### Requiring the plugin
+By default the client-side is which the synchronzation is done return the time in second since the client started using 
+`Date.now`.
+
+In many case, you might want to configure this to synchronize to a particular clock, e.g. `audioContext.currentTime`. 
+
+#### Synchronizing audio using `audioContext.currentTime`
+
+An important thing to consider to synchronize using `audioContext.currentTime` is that the audio clock starts to increment only after `audioContext.resume()` has been called. If the `audioContext` is suspended calling `audioContext.currentTime` will always return `0`, breaking the synchronization process. Therefore you must make sure to `resume` the audio context first using the `@soudnworks/plugin-platform` plugin before starting the sync plugin.
+
+```sh
+// install the `@soundworks/plugin-platform` plugin
+npm install --save @soundworks/plugin-platform
+```
+
+Configure the sync plugin to use the audio context as the local clock (see `getTimeFunction` options), and make sure the plugin is started **after** the platform plugin (see 4rth argument).
 
 ```js
-// MyExperience.js
-import { Experience } from '@soundworks/core/client';
+import { Client } from '@soundworks/core/client';
+import pluginPlatform from '@soundworks/plugin-platform/client';
+import pluginSync from '@soundworks/plugin-sync/client';
 
-class MyExperience extends Experience {
-  constructor(client) {
-    super(client);
-    // require plugin in the experience
-    this.sync = this.require('sync');
-  }
-}
+const client = new Client(config);
+// create an audio context
+const audioContext = new AudioContext();
+
+// register the platform plugin to resume the audio context
+client.pluginManager.register('platform', pluginPlatform, {
+  'audio-context': [audioContext],
+});
+// configure the platform plugin to use a resumed audio context
+client.pluginManager.register('sync', pluginSyncFactory, {
+  getTimeFunction: () => audioContext.currentTime,
+}, ['platform']);
 ```
+
 
 ### Local time and synchronized time
 
@@ -124,20 +129,6 @@ const sync = this.sync.getSyncTime();
 // get time estimated in the synchronized clock reference
 // according the time given in the local clock reference
 const sync = this.sync.getSyncTime(localTime);
-```
-
-### Auditing synchronization process
-
-On the client side you can track the synchronization process, by checking the synchronization reports
-
-```js
-// be notified when a new report is available
-this.sync.onReport(report => {
-  console.log(report);
-});
-
-// or in a pull fashion
-const report = this.sync.getReport();
 ```
 
 ### Synchronizing audio events with `waves-masters`

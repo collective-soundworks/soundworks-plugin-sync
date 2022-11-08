@@ -1,87 +1,88 @@
 import { SyncClient } from '@ircam/sync';
 
 /**
- * Interface for the client `'sync'` service.
+ * The `sync` plugin synchronizes a local clock from the client with
+ * the master clock from the server. The local clock against (e.g. some
+ * `audioContext.currentTime``) on which the synchronization process is
+ * done can be user-defined through the `getTimeFunction` option.
  *
- * The `sync` service synchronizes the a given local clock of the client with
- * the clock of the server (master clock). It internally relies on the `WebAudio`
- * clock and then requires the `platform` service to access this feature.
- *
- * _Note:_ the service is based on
- * [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
- *
- * @example
- * // inside the experience constructor
- * this.sync = this.require('sync', {
- *   getTimeFunction: () => audioContext.currentTime
- * });
- * // when the experience has started, translate the sync time in local time
- * const syncTime = this.sync.getSyncTime();
- * const localTime = this.sync.getLocalTime(syncTime);
+ * The plugin is based on the [`@ircam/sync`](https://github.com/ircam-ismm/sync)
+ * library.
  */
-const pluginFactory = function(AbstractPlugin) {
+export default function(Plugin) {
 
-  return class PluginSync extends AbstractPlugin {
-    constructor(client, name, options) {
-      super(client, name);
+  /**
+   *
+   *
+   */
+  return class PluginSync extends Plugin {
+    constructor(client, id, options) {
+      super(client, id);
 
-      const startTime = Date.now() * 0.001
+      const startTime = Date.now() * 0.001;
 
       const defaults = {
         getTimeFunction: () => Date.now() * 0.001 - startTime,
-        globalReport: false, // do not document for now, for tests and internal use
-        // localReport: true,
+        onReport: null,
       };
 
-      this.options = this.configure(defaults, options);
+      this.options = Object.assign({}, defaults, options);
+
+      if (!(typeof this.options.getTimeFunction === 'function')) {
+        throw new Error(`[soundworks:PluginSync] Invalid option "getTimeFunction", "getTimeFunction" is mandatory and should be a function`);
+      }
 
       this.getLocalTime = this.getLocalTime.bind(this);
       this.getSyncTime = this.getSyncTime.bind(this);
 
-      this._onReport = report => {};
+      this._onReportCallbacks = new Set();
       this._report = null;
-      this._ready = false;
+
+      if (this.options.onReport !== null) {
+        this.onReport(this.options.onReport);
+      }
     }
 
     async start() {
-      this.state = await this.client.stateManager.create(`s:${this.name}`);
-      this._sync = new SyncClient(this.options.getTimeFunction);
+      await super.start();
 
-      const sendCache = new Float64Array(2);
-      const sendFunction = (id, clientPingTime) => {
-        sendCache[0] = id;
-        sendCache[1] = clientPingTime;
+      return new Promise(resolve => {
+        this._sync = new SyncClient(this.options.getTimeFunction);
 
-        this.client.socket.sendBinary(`s:${this.name}:ping`, sendCache);
-      };
+        const sendCache = new Float64Array(2);
+        const sendFunction = (id, clientPingTime) => {
+          sendCache[0] = id;
+          sendCache[1] = clientPingTime;
 
-      const receiveFunction = callback => {
-        this.client.socket.addBinaryListener(`s:${this.name}:pong`, data => {
-          const id = data[0];
-          const clientPingTime = data[1];
-          const serverPingTime = data[2];
-          const serverPongTime = data[3];
+          this.client.socket.sendBinary(`s:${this.id}:ping`, sendCache);
+        };
 
-          callback(id, clientPingTime, serverPingTime, serverPongTime);
-        });
-      };
+        const receiveFunction = callback => {
+          this.client.socket.addBinaryListener(`s:${this.id}:pong`, data => {
+            const id = data[0];
+            const clientPingTime = data[1];
+            const serverPingTime = data[2];
+            const serverPongTime = data[3];
 
-      this._sync.start(sendFunction, receiveFunction, (report) => {
-        if (this.options.globalReport === true) {
-          this.state.set({ report });
-        }
+            callback(id, clientPingTime, serverPingTime, serverPongTime);
+          });
+        };
 
-        if (report.status === 'training' || report.status === 'sync') {
-          if (this.signals.ready.value === false) {
-            this.ready();
+        this._sync.start(sendFunction, receiveFunction, (report) => {
+          // resolove promise on first report
+          if (report.status === 'training' || report.status === 'sync') {
+            resolve();
           }
-        }
 
-        this._report = report;
-        this._onReport(this._report);
+          this._report = report;
+
+          this._onReportCallbacks.forEach(callback => callback(this._report));
+        });
       });
+    }
 
-      this.started();
+    async stop() {
+      this._sync.stop();
     }
 
     /**
@@ -109,21 +110,27 @@ const pluginFactory = function(AbstractPlugin) {
     }
 
     /**
-     * Subscribe to reports
+     * Subscribe to reports from the sync process.
+     * See [https://github.com/ircam-ismm/sync#SyncClient..reportFunction](https://github.com/ircam-ismm/sync#SyncClient..reportFunction)
      * @param {Function} callback
      */
     onReport(callback) {
-      this._onReport = callback;
+      if (!(typeof callback === 'function')) {
+        throw new Error(`[soundworks:PluginSync] Invalid param "onReport", "onReport" should be a function`);
+      }
+
+      this._onReportCallbacks.add(callback);
+
+      return () => this._onReportCallbacks.delete(callback);
     }
 
     /**
-     * Get current report
+     * Get last report.
+     * See [https://github.com/ircam-ismm/sync#SyncClient..reportFunction](https://github.com/ircam-ismm/sync#SyncClient..reportFunction)
      * @return {Object} report
      */
-    getReport(callback) {
+    getReport() {
       return this._report;
     }
-  }
+  };
 }
-
-export default pluginFactory;
