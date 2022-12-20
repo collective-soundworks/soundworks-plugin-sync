@@ -17,7 +17,7 @@ const config = {
   },
   env: {
     port: 8080,
-    serverIp: '127.0.0.1',
+    serverAddress: '127.0.0.1',
     useHttps: false,
     verbose: false,
   },
@@ -50,7 +50,7 @@ describe('PluginSync', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('sync', clientPluginSync, {
         getTimeFunction: 'not a function',
       });
@@ -78,7 +78,7 @@ describe('PluginSync', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('sync', clientPluginSync, {
         onReport: 'not a function',
       });
@@ -109,7 +109,7 @@ describe('PluginSync', () => {
       await server.start();
 
       let receivedReport = false;
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('sync', clientPluginSync, {
         onReport: async report => {
           assert.isObject(report);
@@ -143,7 +143,7 @@ describe('PluginSync', () => {
       await server.start();
 
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       let receivedReport = false;
       client.pluginManager.register('sync', clientPluginSync, {
@@ -179,7 +179,7 @@ describe('PluginSync', () => {
       const serverSync = await server.pluginManager.get('sync');
 
       // create a client which click as a randomized offset
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       const startTime = process.hrtime();
       const randomOffset = Math.round((Math.random() * 2 - 1) * 1e9);
