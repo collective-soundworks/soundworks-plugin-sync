@@ -154,7 +154,7 @@ describe('PluginSync', () => {
       });
 
       await client.init();
-      // the plugin stop function must be called for the sync plugin once started
+      // the plugin stop function must be called for the sync plugin
       // to be properly cleaned out and allow the process to stop.
       await client.start();
       await client.stop();
