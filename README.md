@@ -4,7 +4,7 @@
 
 [`soundworks`](https://github.com/collective-soundworks/soundworks) plugin for synchronizing clients on a common master clock.
 
-Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" [M. van Steen & A. S. Tanenbaum](https://link.springer.com/article/10.1007/s00607-016-0508-7). The `sync` plugin synchronizes a local clock from the client with a master clock from the server.
+Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" [[M. van Steen & A. S. Tanenbaum](https://link.springer.com/article/10.1007/s00607-016-0508-7)]. The `sync` plugin synchronizes a local clock from the client with a master clock from the server.
 
 The plugin is a wrapper around the [`@ircam/sync`](https://github.com/ircam-ismm/sync) library.
 
