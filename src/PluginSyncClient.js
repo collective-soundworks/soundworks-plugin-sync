@@ -65,11 +65,11 @@ export default function(Plugin) {
           sendCache[0] = id;
           sendCache[1] = clientPingTime;
 
-          this.client.socket.sendBinary(`s:${this.id}:ping`, sendCache);
+          this.client.socket.sendBinary(`sw:${this.id}:ping`, sendCache);
         };
 
         const receiveFunction = callback => {
-          this.client.socket.addBinaryListener(`s:${this.id}:pong`, data => {
+          this.client.socket.addBinaryListener(`sw:${this.id}:pong`, data => {
             const id = data[0];
             const clientPingTime = data[1];
             const serverPingTime = data[2];

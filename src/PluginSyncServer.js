@@ -53,11 +53,11 @@ export default function(Plugin) {
         sendCache[2] = serverPingTime;
         sendCache[3] = serverPongTime;
 
-        client.socket.sendBinary(`s:${this.id}:pong`, sendCache);
+        client.socket.sendBinary(`sw:${this.id}:pong`, sendCache);
       };
 
       const receiveFunction = callback => {
-        client.socket.addBinaryListener(`s:${this.id}:ping`, data => {
+        client.socket.addBinaryListener(`sw:${this.id}:ping`, data => {
           const id = data[0];
           const clientPingTime = data[1];
 
@@ -70,7 +70,7 @@ export default function(Plugin) {
 
     /** @private */
     async removeClient(client) {
-      client.socket.removeAllBinaryListeners(`s:${this.id}:ping`);
+      client.socket.removeAllBinaryListeners(`sw:${this.id}:ping`);
       await super.removeClient(client);
     }
 
