@@ -102,7 +102,7 @@ export default function(Plugin) {
      * and the associated local time.
      *
      * @param {Number} [syncTime] - optionnal, time from the sync clock (sec).
-     * @return {Number} - Local time corresponding to the given sync time (sec).
+     * @return {Number} Local time corresponding to the given sync time (sec).
      */
     getLocalTime(syncTime) {
       return this._sync.getLocalTime(syncTime);
@@ -114,7 +114,7 @@ export default function(Plugin) {
      * and the associated sync time.
      *
      * @param {Number} [audioTime] - optionnal, time from the local clock (sec).
-     * @return {Number} - Sync time corresponding to the given local time (sec).
+     * @return {Number} Sync time corresponding to the given local time (sec).
      */
     getSyncTime(localTime) {
       return this._sync.getSyncTime(localTime);
@@ -136,9 +136,9 @@ export default function(Plugin) {
     }
 
     /**
-     * Get last report.
+     * Get last statistics from the synchronaization process.
      * See [https://github.com/ircam-ismm/sync#SyncClient..reportFunction](https://github.com/ircam-ismm/sync#SyncClient..reportFunction)
-     * @return {Object} report
+     * @return {Object} The last report
      */
     getReport() {
       return this._report;

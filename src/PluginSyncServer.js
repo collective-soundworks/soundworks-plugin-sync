@@ -83,7 +83,7 @@ export default function(Plugin) {
      * @note: server-side, `getLocalTime` and `getSyncTime` are identical
      *
      * @param {Number} [syncTime] - optionnal, time from the sync clock (sec).
-     * @return {Number} - Local time corresponding to the given sync time (sec).
+     * @return {Number} Local time corresponding to the given sync time (sec).
      */
     getLocalTime(syncTime) {
       return this._sync.getLocalTime(syncTime);
@@ -97,7 +97,7 @@ export default function(Plugin) {
      * @note: server-side, `getLocalTime` and `getSyncTime` are identical
      *
      * @param {Number} [localTime] - optionnal, time from the local clock (sec).
-     * @return {Number} - Sync time corresponding to the given local time (sec).
+     * @return {Number} Sync time corresponding to the given local time (sec).
      */
     getSyncTime(localTime) {
       return this._sync.getSyncTime(localTime);
