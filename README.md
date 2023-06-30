@@ -4,7 +4,7 @@
 
 [`soundworks`](https://github.com/collective-soundworks/soundworks) plugin for synchronizing clients on a common master clock.
 
-Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" [[M. van Steen & A. S. Tanenbaum](https://link.springer.com/article/10.1007/s00607-016-0508-7)]. The `sync` plugin synchronizes a local clock from the client with a master clock from the server.
+Because _"as a consequence of dealing with independent nodes, each one will have its own notion of time [...] we cannot assume that there is something like a **global clock**"_ [[M. van Steen & A. S. Tanenbaum](https://link.springer.com/article/10.1007/s00607-016-0508-7)], the `sync` plugin synchronizes a local clock from the client with a master clock from the server.
 
 The plugin is a wrapper around the [`@ircam/sync`](https://github.com/ircam-ismm/sync) library.
 
@@ -49,19 +49,6 @@ const server = new Server(config);
 server.pluginManager.register('sync', pluginSync);
 ```
 
-By default the server-side master clock return the time in seconds since the plugin started using `process.hrtime()`, i.e:
-
-```js
-let startTime = process.hrtime();
-
-getTimeFunction() {
-  const now = process.hrtime(startTime);
-  return now[0] + now[1] * 1e-9;
-}
-```
-
-In most case, you will be perfectly fine with this default.
-
 ### Client
 
 ```js
@@ -73,15 +60,32 @@ const client = new Client();
 client.pluginManager.register('sync', pluginSync);
 ```
 
-By default the client-side is which the synchronzation is done return the time in second since the plugin started using `performance.now` (if available) or `Date.now` on browser clients, and `process.hrtime` on node clients. All of these clocks use an origin set when the plugin starts.
-
-In many case, you will want to configure this function to synchronize to a particular clock, such as the `audioContext.currentTime` to synchronize audio events between different clients:
-
 ## Notes
+
+### Default clocks
+
+On the server side, the master clock used by default returns the time in seconds since the plugin started using `process.hrtime()`, i.e:
+
+```js
+const startTime = process.hrtime();
+
+getTimeFunction() {
+  const now = process.hrtime(startTime);
+  return now[0] + now[1] * 1e-9;
+}
+```
+
+In most case, you will be perfectly fine with this default.
+
+On the clients, the local clocks used by default return the time in second since the plugin started using `performance.now` on browser clients, or `process.hrtime` on node clients.
+
+In many case, you will want to configure this to synchronize with another clock, such as the `audioContext.currentTime`.
 
 ### Using `audioContext.currentTime` as the local clock
 
-An important thing to consider to synchronize using `audioContext.currentTime` is that the audio clock starts to increment only after `await audioContext.resume()` has been called. If the `audioContext` is suspended calling `audioContext.currentTime` will always return `0`, breaking the synchronization process. Therefore you must make sure to `resume` the audio context first using the [`@soudnworks/plugin-platform-init`](https://soundworks.dev/plugins/platform-init.html) plugin before starting the `sync` plugin itself.
+An important thing to consider to perform synchronization using the `audioContext.currentTime` is that the audio clock only starts to increment when `await audioContext.resume()` has been fulfilled. In other words, if the `audioContext` is suspended calling `audioContext.currentTime` will always return `0` and the synchronization process will be broken. 
+
+Hence, you must make sure to `resume` the audio context first, for example using the [`@soudnworks/plugin-platform-init`](https://soundworks.dev/plugins/platform-init.html) plugin, before starting the synchronization process.
 
 First you will need to install the `@soundworks/plugin-platform-init`
 
@@ -89,7 +93,7 @@ First you will need to install the `@soundworks/plugin-platform-init`
 npm install --save @soundworks/plugin-platform-init
 ```
 
-Then, you will need to register the `platform-init` plugin and configure it so that it resumes the audio context, and finally configure the `sync` plugin to use the `audioContext.currentTime` as the local clock:
+Then, you will need to register the `platform-init` plugin and configure it so that it resumes the audio context:
 
 ```js
 import { Client } from '@soundworks/core/client.js';
@@ -101,41 +105,29 @@ const client = new Client(config);
 const audioContext = new AudioContext();
 // register the platform plugin to resume the audio context
 client.pluginManager.register('platform', pluginPlatform, { audioContext });
-// configure the platform plugin to use a resumed audio context
+```
+
+Finally, you will need to configure the `sync` plugin to use the `audioContext.currentTime` as the local clock, and to make sure it is started after the platform is itself fully started. 
+
+To that end, the last argument passed to the `pluginManager.register` method (i.e. `['platform']`) specifically tells soundworks to start the `sync` plugin only once the `platform` plugin is itself started.
+
+```js
+client.pluginManager.register('platform', pluginPlatform, { audioContext });
+// configure the sync plugin to start once the audio context is resumed
 client.pluginManager.register('sync', pluginSync, {
   getTimeFunction: () => audioContext.currentTime,
 }, ['platform']);
 ```
 
-Note the 4rth argument passed to the `pluginManager` when registering the `sync` plugin (i.e. `['platform']`). This argument specifically tells soundworks to start the `sync` plugin only once the `platform` plugin is itself started.
+### Scheduling synchronized audio events
 
-### Correspondance between local time and sync time
-
-The following API is similar client-side and server-side
-
-```js
-// get current time from the local clock reference
-const localTime = this.sync.getLocalTime();
-// get time in the local clock reference according to the
-// time given in the synchronized clock reference
-const localTime = this.sync.getLocalTime(syncTime);
-
-// get time estimated in the synchronized clock reference
-const sync = this.sync.getSyncTime();
-// get time estimated in the synchronized clock reference
-// according the time given in the local clock reference
-const sync = this.sync.getSyncTime(localTime);
-```
-
-### Scheduling synchroinzed audio events
-
-When you propagate some event on your network of devices to trigger a sound at a specific synchronized time, you will need to convert this synchronized information to the local audio clock so that you speak to the audio context on it's own clock (which wont be same on each device). The next example assume you have some [shared state](https://soundworks.dev/tutorials/state-manager.html) 
+When you propagate some event on your network of devices to trigger a sound at a specific synchronized time, you will need to convert this synchronized information to the local audio clock so that you speak to the audio context on it's own time reference (which wont be same on each device). The next example assume you have some [shared state](https://soundworks.dev/tutorials/state-manager.html) set up between all your clients:
 
 ```js
 // client pseudo-code
 const sync = await client.pluginManager.get('sync');
 
-sharedState.onUpdate(updates => {
+mySharedState.onUpdate(updates => {
   // syncTriggerTime is the time of an audio even defined in the sync clock
   if ('syncTriggerTime' in updates) {
     const syncTime = updates.syncTriggerTime;
@@ -147,10 +139,30 @@ sharedState.onUpdate(updates => {
     src.connect(audioContext.destination);
     src.start(audioTime); 
   }
-})
+});
 ```
 
-Note that this strategy effectively trigger the sound at the same time on each client, but it will not compensate for the [audio output latency](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/outputLatency) of each client (which unfortunately may differ to a great extent...).
+Note that this simple strategy will effectively trigger the sound at the same logical time on each client, but it will unfortunately not compensate for the [audio output latency](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/outputLatency) of each client (which may differ to a great extent...).
+
+### Correspondances between local time and sync time
+
+The following API is similar client-side and server-side:
+
+```js
+// get current time from the local clock reference
+const localTime = sync.getLocalTime();
+// get time in the local clock reference according to the
+// time given in the synchronized clock reference
+const localTime = sync.getLocalTime(syncTime);
+
+// get time in the synchronized clock reference
+const sync = sync.getSyncTime();
+// get time in the synchronized clock reference
+// according the time given in the local clock reference
+const sync = sync.getSyncTime(localTime);
+```
+
+Note that on the server-side, as it is the master clock, there is no difference between `localTime` and `syncTime`.
 
 ## API
 
