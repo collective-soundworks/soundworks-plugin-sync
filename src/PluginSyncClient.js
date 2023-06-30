@@ -1,35 +1,45 @@
 import { SyncClient } from '@ircam/sync';
+import { isFunction } from '@ircam/sc-utils';
+import { getTime } from '@ircam/sc-gettime';
 
-/**
- * The `sync` plugin synchronizes a local clock from the client with
- * the master clock from the server. The local clock against (e.g. some
- * `audioContext.currentTime``) on which the synchronization process is
- * done can be user-defined through the `getTimeFunction` option.
- *
- * The plugin is based on the [`@ircam/sync`](https://github.com/ircam-ismm/sync)
- * library.
- */
 export default function(Plugin) {
-
   /**
-   *
-   *
+   * Client-side representation of the soundworks' sync plugin.
    */
-  return class PluginSync extends Plugin {
+  class PluginSyncClient extends Plugin {
+    /**
+     * The constructor should never be called manually. The plugin will be
+     * instantiated by soundworks when registered in the `pluginManager`
+     *
+     * Available options:
+     * - `getTimeFunction` {Function} - Function that returns a time in second.
+     *  Defaults to `performance.now` is available or `Date.now` on browser clients,
+     *  and `process.hrtime` on node clients, all of them with an origin set when
+     *  the plugin starts.
+     * - `[onReport=null]` {Function} - Function to execute when the synchronization
+     *  reports some statistics.
+     *
+     * @example
+     * client.pluginManager.register('sync', syncPlugin, {
+     *   getTimeFunction: () => audioContext.currentTime,
+     * });
+     */
     constructor(client, id, options) {
       super(client, id);
 
-      const startTime = Date.now() * 0.001;
-
       const defaults = {
-        getTimeFunction: () => Date.now() * 0.001 - startTime,
+        getTimeFunction: getTime,
         onReport: null,
       };
 
-      this.options = Object.assign({}, defaults, options);
+      this.options = Object.assign(defaults, options);
 
-      if (!(typeof this.options.getTimeFunction === 'function')) {
+      if (!isFunction(this.options.getTimeFunction)) {
         throw new Error(`[soundworks:PluginSync] Invalid option "getTimeFunction", "getTimeFunction" is mandatory and should be a function`);
+      }
+
+      if (this.options.onReport !== null && !isFunction(this.options.onReport)) {
+        throw new Error(`[soundworks:PluginSync] Invalid option "onReport", "onReport" should be null or a function`);
       }
 
       this.getLocalTime = this.getLocalTime.bind(this);
@@ -43,6 +53,7 @@ export default function(Plugin) {
       }
     }
 
+    /** @private */
     async start() {
       await super.start();
 
@@ -133,4 +144,6 @@ export default function(Plugin) {
       return this._report;
     }
   };
+
+  return PluginSyncClient;
 }

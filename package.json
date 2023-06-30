@@ -8,13 +8,15 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "exports": {
-    "./client.js": "./src/client/plugin-sync.js",
-    "./server.js": "./src/server/plugin-sync.js"
+    "./client.js": "./src/PluginSyncClient.js",
+    "./server.js": "./src/PluginSyncServer.js"
   },
   "scripts": {
+    "api": "jsdoc-to-readme --src src/*.js",
     "lint": "npx eslint src && npx eslint tests",
-    "test": "mocha tests/plugin-sync.spec.js",
-    "toc": "markdown-toc -i README.md"
+    "preversion": "npm run api && npm run toc && git commit -am 'docs: build' --allow-empty",
+    "test": "mocha",
+    "toc": "markdown-toc -i README.md --maxdepth 3"
   },
   "publishConfig": {
     "access": "public"
@@ -26,13 +28,17 @@
   "bugs": {
     "url": "https://github.com/collective-soundworks/soundworks-plugin-sync/issues"
   },
-  "homepage": "https://github.com/collective-soundworks/soundworks-plugin-sync#readme",
+  "homepage": "https://soundworks.dev",
   "dependencies": {
+    "@ircam/sc-gettime": "^1.0.1",
+    "@ircam/sc-utils": "^1.0.1",
     "@ircam/sync": "^2.1.0"
   },
   "devDependencies": {
     "@ircam/eslint-config": "^1.1.0",
+    "@soundworks/core": "^4.0.0-alpha.7",
     "chai": "^4.3.6",
+    "jsdoc-to-readme": "^1.1.0",
     "markdown-toc": "^1.2.0",
     "mocha": "^10.1.0"
   }

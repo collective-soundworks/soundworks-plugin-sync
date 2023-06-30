@@ -3,8 +3,8 @@ import { assert } from 'chai';
 import { Server } from '@soundworks/core/server.js';
 import { Client } from '@soundworks/core/client.js';
 
-import serverPluginSync from '../src/server/plugin-sync.js';
-import clientPluginSync from '../src/client/plugin-sync.js';
+import pluginSyncServer from '../src/PluginSyncServer.js';
+import pluginSyncClient from '../src/PluginSyncClient.js';
 
 const config = {
   app: {
@@ -27,14 +27,14 @@ describe('PluginSync', () => {
   describe('constructor(server|client, id, options)', () => {
     it('[server] should throw if "options.getTimeFunction" is not a function', async () => {
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync, {
-        getTimeFunction: 'not a function',
-      });
 
       let errored = false;
+
       try {
-        await server.init();
-      } catch(err) {
+        server.pluginManager.register('sync', pluginSyncServer, {
+          getTimeFunction: 'not a function',
+        });
+      } catch (err) {
         errored = true;
         console.log(err.message);
       }
@@ -46,19 +46,16 @@ describe('PluginSync', () => {
 
     it('[client] should throw if "options.getTimeFunction" is not a function', async () => {
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync);
-      await server.init();
+      server.pluginManager.register('sync', pluginSyncServer);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('sync', clientPluginSync, {
-        getTimeFunction: 'not a function',
-      });
-
 
       let errored = false;
       try {
-        await client.init();
+        client.pluginManager.register('sync', pluginSyncClient, {
+          getTimeFunction: 'not a function',
+        });
       } catch(err) {
         errored = true;
         console.log(err.message);
@@ -74,25 +71,21 @@ describe('PluginSync', () => {
 
     it('[client] should throw if "options.onReport" is not a function', async () => {
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync);
-      await server.init();
+      server.pluginManager.register('sync', pluginSyncServer);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('sync', clientPluginSync, {
-        onReport: 'not a function',
-      });
-
 
       let errored = false;
       try {
-        await client.init();
+        client.pluginManager.register('sync', pluginSyncClient, {
+          onReport: 'not a function',
+        });
       } catch(err) {
         errored = true;
         console.log(err.message);
       }
 
-      // stop the server
       await server.stop();
 
       if (!errored) {
@@ -104,13 +97,12 @@ describe('PluginSync', () => {
       this.timeout(3000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync);
-      await server.init();
+      server.pluginManager.register('sync', pluginSyncServer);
       await server.start();
 
       let receivedReport = false;
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('sync', clientPluginSync, {
+      client.pluginManager.register('sync', pluginSyncClient, {
         onReport: async report => {
           assert.isObject(report);
           receivedReport = true;
@@ -138,7 +130,7 @@ describe('PluginSync', () => {
       this.timeout(3000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync);
+      server.pluginManager.register('sync', pluginSyncServer);
       await server.init();
       await server.start();
 
@@ -146,19 +138,19 @@ describe('PluginSync', () => {
       const client = new Client({ role: 'test', ...config });
 
       let receivedReport = false;
-      client.pluginManager.register('sync', clientPluginSync, {
+      client.pluginManager.register('sync', pluginSyncClient, {
         onReport: async (report) => {
+          console.log(report);
           receivedReport = true;
           assert.isObject(report);
         },
       });
 
-      await client.init();
-      // the plugin stop function must be called for the sync plugin
-      // to be properly cleaned out and allow the process to stop.
+      // client.start resolves when on report is called for the first time,
+      // so await is sufficient here
       await client.start();
       await client.stop();
-      // stop the server
+
       await server.stop();
 
       if (!receivedReport) {
@@ -172,8 +164,7 @@ describe('PluginSync', () => {
       this.timeout(20000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', serverPluginSync);
-      await server.init();
+      server.pluginManager.register('sync', pluginSyncServer);
       await server.start();
 
       const serverSync = await server.pluginManager.get('sync');
@@ -183,14 +174,14 @@ describe('PluginSync', () => {
 
       const startTime = process.hrtime();
       const randomOffset = Math.round((Math.random() * 2 - 1) * 1e9);
-      client.pluginManager.register('sync', clientPluginSync, {
+
+      client.pluginManager.register('sync', pluginSyncClient, {
         getTimeFunction: () => {
           const now = process.hrtime(startTime);
           return now[0] + now[1] * 1e-9 - randomOffset;
         },
       });
 
-      await client.init();
       await client.start();
 
       const clientSync = await client.pluginManager.get('sync');

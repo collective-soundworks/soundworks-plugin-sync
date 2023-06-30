@@ -1,25 +1,33 @@
 import { SyncServer } from '@ircam/sync';
+import { isFunction } from '@ircam/sc-utils';
+import { getTime } from '@ircam/sc-gettime';
 
-function isFunction(func) {
-  return Object.prototype.toString.call(func) == '[object Function]' ||
-    Object.prototype.toString.call(func) == '[object AsyncFunction]';
-}
 
 export default function(Plugin) {
-  return class PluginSync extends Plugin {
+  /**
+   * Server-side representation of the soundworks' sync plugin.
+   */
+  class PluginSyncServer extends Plugin {
+    /**
+     * The constructor should never be called manually. The plugin will be
+     * instantiated by soundworks when registered in the `pluginManager`
+     *
+     * Available options:
+     * - `getTimeFunction` {Function} - Function that returns a time in second.
+     *  Defaults to `process.hrtime` with an origin set when the plugin starts.
+     *  In most cases, you shouldn't have to modify this default behavior.
+     *
+     * @example
+     * server.pluginManager.register('sync', syncPlugin);
+     */
     constructor(server, id, options) {
       super(server, id);
 
-      // @todo - update w/ some getTime librarie (`sc-get-time`)
-      const startTime = process.hrtime();
       const defaults = {
-        getTimeFunction: () => {
-          const now = process.hrtime(startTime);
-          return now[0] + now[1] * 1e-9;
-        },
+        getTimeFunction: getTime,
       };
 
-      this.options = Object.assign({}, defaults, options);
+      this.options = Object.assign(defaults, options);
 
       if (!isFunction(this.options.getTimeFunction)) {
         throw new Error(`[soundworks:PluginSync] Invalid option "getTimeFunction", "getTimeFunction" is mandatory and should be a function`);
@@ -28,10 +36,12 @@ export default function(Plugin) {
       this._sync = null;
     }
 
+    /** @private */
     async start() {
       this._sync = new SyncServer(this.options.getTimeFunction);
     }
 
+    /** @private */
     async addClient(client) {
       await super.addClient(client);
 
@@ -58,6 +68,7 @@ export default function(Plugin) {
       this._sync.start(sendFunction, receiveFunction);
     }
 
+    /** @private */
     async removeClient(client) {
       client.socket.removeAllBinaryListeners(`s:${this.id}:ping`);
       await super.removeClient(client);
@@ -92,4 +103,6 @@ export default function(Plugin) {
       return this._sync.getSyncTime(localTime);
     }
   };
+
+  return PluginSyncServer;
 }

@@ -7,6 +7,14 @@ The plugin is built on top of the [`@ircam/sync`](https://github.com/collective-
 
 Because "as a consequence of dealing with independent nodes, each one will have its own notion of time. In other words, we cannot assume that there is something like a **global clock**" in _Maarten van Steen and Andrew S. Tanenbaum, A brief introduction to distributed systems, Computing, vol.98, n°10, 2016_
 
+ * The `sync` plugin synchronizes a local clock from the client with
+ * the master clock from the server. The local clock against (e.g. some
+ * `audioContext.currentTime``) on which the synchronization process is
+ * done can be user-defined through the `getTimeFunction` option.
+ *
+ * The plugin is based on the [`@ircam/sync`](https://github.com/ircam-ismm/sync)
+ * library.
+
 ## Table of Contents
 
 <!-- toc -->
@@ -35,10 +43,6 @@ Because "as a consequence of dealing with independent nodes, each one will have 
 ```sh
 npm install --save @soundworks/plugin-sync
 ```
-
-## Example
-
-A working example can be found in the [https://github.com/collective-soundworks/soundworks-examples](https://github.com/collective-soundworks/soundworks-examples) repository.
 
 ## Usage
 
