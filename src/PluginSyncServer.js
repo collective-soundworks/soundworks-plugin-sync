@@ -38,6 +38,8 @@ export default function(Plugin) {
 
     /** @private */
     async start() {
+      await super.start();
+
       this._sync = new SyncServer(this.options.getTimeFunction);
     }
 

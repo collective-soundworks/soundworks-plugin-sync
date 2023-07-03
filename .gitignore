@@ -1,5 +1,5 @@
 # others
-/node_modules
+node_modules
 
 # junk files
 .DS_Store
@@ -7,3 +7,4 @@ Thumbs.db
 
 # ...
 NOTES.md
+TODOS.md
