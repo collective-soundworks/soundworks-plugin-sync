@@ -5,7 +5,7 @@ import { getTime } from '@ircam/sc-gettime';
 
 export default function(Plugin) {
   /**
-   * Server-side representation of the soundworks' sync plugin.
+   * Server-side representation of the soundworks sync plugin.
    */
   class PluginSyncServer extends Plugin {
     /**
@@ -18,7 +18,7 @@ export default function(Plugin) {
      *  In most cases, you shouldn't have to modify this default behavior.
      *
      * @example
-     * server.pluginManager.register('sync', syncPlugin);
+     * server.pluginManager.register('sync', pluginSync);
      */
     constructor(server, id, options) {
       super(server, id);

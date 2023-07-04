@@ -4,7 +4,7 @@ import { getTime } from '@ircam/sc-gettime';
 
 export default function(Plugin) {
   /**
-   * Client-side representation of the soundworks' sync plugin.
+   * Client-side representation of the soundworks sync plugin.
    */
   class PluginSyncClient extends Plugin {
     /**
@@ -20,7 +20,7 @@ export default function(Plugin) {
      *  reports some statistics.
      *
      * @example
-     * client.pluginManager.register('sync', syncPlugin, {
+     * client.pluginManager.register('sync', pluginSync, {
      *   getTimeFunction: () => audioContext.currentTime,
      * });
      */

@@ -61,7 +61,7 @@ const client = new Client();
 client.pluginManager.register('sync', pluginSync);
 ```
 
-## Notes
+## Notes & Receipes
 
 ### Default clocks
 
