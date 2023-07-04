@@ -16,7 +16,7 @@ The plugin is a wrapper around the [`@ircam/sync`](https://github.com/ircam-ismm
 - [Usage](#usage)
   * [Server](#server)
   * [Client](#client)
-- [Notes](#notes)
+- [Notes & Receipes](#notes--receipes)
   * [Default clocks](#default-clocks)
   * [Using `audioContext.currentTime` as the local clock](#using-audiocontextcurrenttime-as-the-local-clock)
   * [Scheduling synchronized audio events](#scheduling-synchronized-audio-events)
@@ -173,17 +173,17 @@ Note that on the server-side, as it is the master clock, there is no difference 
 
 <dl>
 <dt><a href="#PluginSyncClient">PluginSyncClient</a></dt>
-<dd><p>Client-side representation of the soundworks&#39; sync plugin.</p>
+<dd><p>Client-side representation of the soundworks sync plugin.</p>
 </dd>
 <dt><a href="#PluginSyncServer">PluginSyncServer</a></dt>
-<dd><p>Server-side representation of the soundworks&#39; sync plugin.</p>
+<dd><p>Server-side representation of the soundworks sync plugin.</p>
 </dd>
 </dl>
 
 <a name="PluginSyncClient"></a>
 
 ### PluginSyncClient
-Client-side representation of the soundworks' sync plugin.
+Client-side representation of the soundworks sync plugin.
 
 **Kind**: global class  
 
@@ -210,7 +210,7 @@ Available options:
 
 **Example**  
 ```js
-client.pluginManager.register('sync', syncPlugin, {
+client.pluginManager.register('sync', pluginSync, {
   getTimeFunction: () => audioContext.currentTime,
 });
 ```
@@ -265,7 +265,7 @@ See [https://github.com/ircam-ismm/sync#SyncClient..reportFunction](https://gith
 <a name="PluginSyncServer"></a>
 
 ### PluginSyncServer
-Server-side representation of the soundworks' sync plugin.
+Server-side representation of the soundworks sync plugin.
 
 **Kind**: global class  
 
@@ -287,7 +287,7 @@ Available options:
 
 **Example**  
 ```js
-server.pluginManager.register('sync', syncPlugin);
+server.pluginManager.register('sync', pluginSync);
 ```
 <a name="PluginSyncServer+getLocalTime"></a>
 
