@@ -18,6 +18,8 @@ export default function(Plugin) {
      *  the plugin starts.
      * - `[onReport=null]` {Function} - Function to execute when the synchronization
      *  reports some statistics.
+     * - `[syncOptions={}]` {Object} - Options to pass to the underlying sync client
+     *  cf. @link{https://github.com/ircam-ismm/sync?tab=readme-ov-file#new_SyncClient_new}
      *
      * @example
      * client.pluginManager.register('sync', pluginSync, {
@@ -30,6 +32,7 @@ export default function(Plugin) {
       const defaults = {
         getTimeFunction: getTime,
         onReport: null,
+        syncOptions: {},
       };
 
       this.options = Object.assign(defaults, options);
@@ -58,7 +61,7 @@ export default function(Plugin) {
       await super.start();
 
       return new Promise(resolve => {
-        this._sync = new SyncClient(this.options.getTimeFunction);
+        this._sync = new SyncClient(this.options.getTimeFunction, this.options.syncOptions);
 
         const sendCache = new Float64Array(2);
         const sendFunction = (id, clientPingTime) => {
