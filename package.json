@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/plugin-sync",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "soundworks plugin for synchronizing clocks across devices",
   "authors": [
     "Benjamin Matuszewski"
