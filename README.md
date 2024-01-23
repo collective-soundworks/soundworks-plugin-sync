@@ -207,6 +207,8 @@ Available options:
  the plugin starts.
 - `[onReport=null]` {Function} - Function to execute when the synchronization
  reports some statistics.
+- `[syncOptions={}]` {Object} - Options to pass to the underlying sync client
+ cf. @link{https://github.com/ircam-ismm/sync?tab=readme-ov-file#new_SyncClient_new}
 
 **Example**  
 ```js
