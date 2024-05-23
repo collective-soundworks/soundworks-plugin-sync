@@ -63,16 +63,16 @@ export default function(Plugin) {
       return new Promise(resolve => {
         this._sync = new SyncClient(this.options.getTimeFunction, this.options.syncOptions);
 
-        const sendCache = new Float64Array(2);
+        const sendCache = new Array(2);
         const sendFunction = (id, clientPingTime) => {
           sendCache[0] = id;
           sendCache[1] = clientPingTime;
 
-          this.client.socket.sendBinary(`sw:${this.id}:ping`, sendCache);
+          this.client.socket.send(`sw:${this.id}:ping`, sendCache);
         };
 
         const receiveFunction = callback => {
-          this.client.socket.addBinaryListener(`sw:${this.id}:pong`, data => {
+          this.client.socket.addListener(`sw:${this.id}:pong`, data => {
             const id = data[0];
             const clientPingTime = data[1];
             const serverPingTime = data[2];

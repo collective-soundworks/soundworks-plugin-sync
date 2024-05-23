@@ -2,6 +2,8 @@ import { SyncServer } from '@ircam/sync';
 import { isFunction } from '@ircam/sc-utils';
 import { getTime } from '@ircam/sc-gettime';
 
+// @note
+// The standard TCP packet size has a minimum of 20 bytes and a maximum of 60 bytes
 
 export default function(Plugin) {
   /**
@@ -47,19 +49,18 @@ export default function(Plugin) {
     async addClient(client) {
       await super.addClient(client);
 
-      const sendCache = new Float64Array(4);
-
+      const sendCache = new Array(4);
       const sendFunction = (id, clientPingTime, serverPingTime, serverPongTime) => {
         sendCache[0] = id;
         sendCache[1] = clientPingTime;
         sendCache[2] = serverPingTime;
         sendCache[3] = serverPongTime;
 
-        client.socket.sendBinary(`sw:${this.id}:pong`, sendCache);
+        client.socket.send(`sw:${this.id}:pong`, sendCache);
       };
 
       const receiveFunction = callback => {
-        client.socket.addBinaryListener(`sw:${this.id}:ping`, data => {
+        client.socket.addListener(`sw:${this.id}:ping`, data => {
           const id = data[0];
           const clientPingTime = data[1];
 
@@ -72,7 +73,7 @@ export default function(Plugin) {
 
     /** @private */
     async removeClient(client) {
-      client.socket.removeAllBinaryListeners(`sw:${this.id}:ping`);
+      client.socket.removeAllListeners(`sw:${this.id}:ping`);
       await super.removeClient(client);
     }
 

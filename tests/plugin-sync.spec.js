@@ -39,9 +39,7 @@ describe('PluginSync', () => {
         console.log(err.message);
       }
 
-      if (!errored) {
-        assert.fail('should have thrown');
-      }
+      assert.isTrue(errored);
     });
 
     it('[client] should throw if "options.getTimeFunction" is not a function', async () => {
@@ -63,10 +61,7 @@ describe('PluginSync', () => {
 
       // stop the server
       await server.stop();
-
-      if (!errored) {
-        assert.fail('should have thrown');
-      }
+      assert.isTrue(errored);
     });
 
     it('[client] should throw if "options.onReport" is not a function', async () => {
@@ -87,10 +82,7 @@ describe('PluginSync', () => {
       }
 
       await server.stop();
-
-      if (!errored) {
-        assert.fail('should have thrown');
-      }
+      assert.isTrue(errored);
     });
 
     it('[client] "options.onReport" should accept async functions', async function() {
