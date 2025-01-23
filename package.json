@@ -31,15 +31,15 @@
   "homepage": "https://soundworks.dev",
   "dependencies": {
     "@ircam/sc-gettime": "^1.0.1",
-    "@ircam/sc-utils": "^1.0.1",
+    "@ircam/sc-utils": "^1.9.0",
     "@ircam/sync": "^2.1.0"
   },
   "devDependencies": {
-    "@ircam/eslint-config": "^1.1.0",
+    "@ircam/eslint-config": "^2.0.1",
     "@soundworks/core": "^4.0.0-alpha.7",
-    "chai": "^4.3.6",
-    "jsdoc-to-readme": "^1.1.0",
+    "chai": "^5.1.2",
+    "jsdoc-to-readme": "^2.0.2",
     "markdown-toc": "^1.2.0",
-    "mocha": "^10.1.0"
+    "mocha": "^11.1.0"
   }
 }

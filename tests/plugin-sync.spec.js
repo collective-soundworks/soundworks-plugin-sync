@@ -54,7 +54,7 @@ describe('PluginSync', () => {
         client.pluginManager.register('sync', pluginSyncClient, {
           getTimeFunction: 'not a function',
         });
-      } catch(err) {
+      } catch (err) {
         errored = true;
         console.log(err.message);
       }
@@ -76,7 +76,7 @@ describe('PluginSync', () => {
         client.pluginManager.register('sync', pluginSyncClient, {
           onReport: 'not a function',
         });
-      } catch(err) {
+      } catch (err) {
         errored = true;
         console.log(err.message);
       }
@@ -103,7 +103,7 @@ describe('PluginSync', () => {
 
       try {
         await client.init();
-      } catch(err) {
+      } catch (err) {
         assert.fail('should accept async functions');
         console.log(err.message);
       }
