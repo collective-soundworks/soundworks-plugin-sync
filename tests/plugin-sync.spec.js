@@ -3,15 +3,15 @@ import { assert } from 'chai';
 import { Server } from '@soundworks/core/server.js';
 import { Client } from '@soundworks/core/client.js';
 
-import pluginSyncServer from '../src/PluginSyncServer.js';
-import pluginSyncClient from '../src/PluginSyncClient.js';
+import ServerPluginSync from '../src/ServerPluginSync.js';
+import ClientPluginSync from '../src/ClientPluginSync.js';
 
 const config = {
   app: {
     name: 'test-plugin-sync',
     clients: {
       test: {
-        target: 'node',
+        runtime: 'node',
       },
     },
   },
@@ -31,7 +31,7 @@ describe('PluginSync', () => {
       let errored = false;
 
       try {
-        server.pluginManager.register('sync', pluginSyncServer, {
+        server.pluginManager.register('sync', ServerPluginSync, {
           getTimeFunction: 'not a function',
         });
       } catch (err) {
@@ -44,14 +44,14 @@ describe('PluginSync', () => {
 
     it('[client] should throw if "options.getTimeFunction" is not a function', async () => {
       const server = new Server(config);
-      server.pluginManager.register('sync', pluginSyncServer);
+      server.pluginManager.register('sync', ServerPluginSync);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
 
       let errored = false;
       try {
-        client.pluginManager.register('sync', pluginSyncClient, {
+        client.pluginManager.register('sync', ClientPluginSync, {
           getTimeFunction: 'not a function',
         });
       } catch (err) {
@@ -66,14 +66,14 @@ describe('PluginSync', () => {
 
     it('[client] should throw if "options.onReport" is not a function', async () => {
       const server = new Server(config);
-      server.pluginManager.register('sync', pluginSyncServer);
+      server.pluginManager.register('sync', ServerPluginSync);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
 
       let errored = false;
       try {
-        client.pluginManager.register('sync', pluginSyncClient, {
+        client.pluginManager.register('sync', ClientPluginSync, {
           onReport: 'not a function',
         });
       } catch (err) {
@@ -89,12 +89,12 @@ describe('PluginSync', () => {
       this.timeout(3000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', pluginSyncServer);
+      server.pluginManager.register('sync', ServerPluginSync);
       await server.start();
 
       let receivedReport = false;
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('sync', pluginSyncClient, {
+      client.pluginManager.register('sync', ClientPluginSync, {
         onReport: async report => {
           assert.isObject(report);
           receivedReport = true;
@@ -122,7 +122,7 @@ describe('PluginSync', () => {
       this.timeout(3000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', pluginSyncServer);
+      server.pluginManager.register('sync', ServerPluginSync);
       await server.init();
       await server.start();
 
@@ -130,7 +130,7 @@ describe('PluginSync', () => {
       const client = new Client({ role: 'test', ...config });
 
       let receivedReport = false;
-      client.pluginManager.register('sync', pluginSyncClient, {
+      client.pluginManager.register('sync', ClientPluginSync, {
         onReport: async (report) => {
           console.log(report);
           receivedReport = true;
@@ -156,7 +156,7 @@ describe('PluginSync', () => {
       this.timeout(20000);
 
       const server = new Server(config);
-      server.pluginManager.register('sync', pluginSyncServer);
+      server.pluginManager.register('sync', ServerPluginSync);
       await server.start();
 
       const serverSync = await server.pluginManager.get('sync');
@@ -167,7 +167,7 @@ describe('PluginSync', () => {
       const startTime = process.hrtime();
       const randomOffset = Math.round((Math.random() * 2 - 1) * 1e9);
 
-      client.pluginManager.register('sync', pluginSyncClient, {
+      client.pluginManager.register('sync', ClientPluginSync, {
         getTimeFunction: () => {
           const now = process.hrtime(startTime);
           return now[0] + now[1] * 1e-9 - randomOffset;

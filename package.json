@@ -8,14 +8,14 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "exports": {
-    "./client.js": "./src/PluginSyncClient.js",
-    "./server.js": "./src/PluginSyncServer.js"
+    "./client.js": "./src/ClientPluginSync.js",
+    "./server.js": "./src/ServerPluginSync.js"
   },
   "scripts": {
     "api": "jsdoc-to-readme --src src/*.js",
     "lint": "npx eslint src && npx eslint tests",
     "preversion": "npm run api && npm run toc && git commit -am 'docs: build' --allow-empty",
-    "test": "mocha",
+    "test": "mocha tests/*.spec.js",
     "toc": "markdown-toc -i README.md --maxdepth 3"
   },
   "publishConfig": {
@@ -30,7 +30,6 @@
   },
   "homepage": "https://soundworks.dev",
   "dependencies": {
-    "@ircam/sc-gettime": "^1.0.1",
     "@ircam/sc-utils": "^1.9.0",
     "@ircam/sync": "^2.1.0"
   },
