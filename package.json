@@ -8,15 +8,24 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "exports": {
-    "./client.js": "./src/ClientPluginSync.js",
-    "./server.js": "./src/ServerPluginSync.js"
+    "./client.js": {
+      "module": "./src/ClientPluginSync.js",
+      "node": "./src/ClientPluginSync.js",
+      "types": "./types/ClientPluginSync.d.ts"
+    },
+    "./server.js": {
+      "module": "./src/ServerPluginSync.js",
+      "node": "./src/ServerPluginSync.js",
+      "types": "./types/ServerPluginSync.d.ts"
+    }
   },
   "scripts": {
-    "api": "jsdoc-to-readme --src src/*.js",
+    "api": "npm run types && jsdoc-to-readme --src src/*.js",
     "lint": "npx eslint src && npx eslint tests",
-    "preversion": "npm run api && npm run toc && git commit -am 'docs: build' --allow-empty",
+    "preversion": "npm run lint && npm run test && npm run api && npm run toc && git commit -am 'docs: build' --allow-empty",
     "test": "mocha tests/*.spec.js",
-    "toc": "markdown-toc -i README.md --maxdepth 3"
+    "toc": "markdown-toc -i README.md --maxdepth 2",
+    "types": "rm -rf types && tsc"
   },
   "publishConfig": {
     "access": "public"
@@ -35,10 +44,13 @@
   },
   "devDependencies": {
     "@ircam/eslint-config": "^2.0.1",
-    "@soundworks/core": "^4.0.0-alpha.7",
     "chai": "^5.1.2",
     "jsdoc-to-readme": "^2.0.2",
     "markdown-toc": "^1.2.0",
-    "mocha": "^11.1.0"
+    "mocha": "^11.1.0",
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "@soundworks/core": "^5.0.0"
   }
 }

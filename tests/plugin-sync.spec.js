@@ -180,9 +180,13 @@ describe('PluginSync', () => {
 
       // log sync time from both sides
       let intervalId = setInterval(() => {
-        console.log('server:', serverSync.getSyncTime());
-        console.log('client:', clientSync.getSyncTime(), '\t - localTime:', clientSync.getLocalTime());
+        const serverTime = serverSync.getSyncTime();
+        const clientTime = clientSync.getSyncTime();
+        console.log('server:', serverTime);
+        console.log('client:', clientTime, '\t - localTime:', clientSync.getLocalTime());
         console.log('----------------------------------');
+
+        assert.isBelow(Math.abs(serverTime - clientTime), 0.005);
       }, 1000);
 
       await new Promise(resolve => setTimeout(resolve, 10 * 1000));
